@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Loan Tracker - Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-primary: #FAFBFD;
+            --bg-secondary: #F1F5F9;
+            --bg-card: #FFFFFF;
+            --text-primary: #1a1a1a;
+            --text-secondary: #5c5c5c;
+            --text-muted: #8a8a8a;
+            --border: #dde3eb;
+            --accent: #2563eb;
+            --accent-dark: #1d4ed8;
+            --accent-light: #eff6ff;
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --warning: #d97706;
+            --warning-light: #fffbeb;
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --purple: #7c3aed;
+            --purple-light: #f5f3ff;
+            --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        header {
+            background: rgba(250, 251, 253, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        nav {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 1.25rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.125rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .logo span {
+            color: var(--accent);
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .btn {
+            padding: 0.625rem 1.25rem;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            border: none;
+            font-family: inherit;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--text-primary);
+            border: 1px solid var(--border);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-secondary);
+            border-color: var(--text-muted);
+        }
+
+        .btn-danger {
+            background: transparent;
+            color: var(--danger);
+            border: 1px solid #fecaca;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8125rem;
+        }
+
+        .btn-danger:hover {
+            background: var(--danger-light);
+        }
+
+        .btn-edit {
+            background: transparent;
+            color: var(--accent);
+            border: 1px solid #bfdbfe;
+            padding: 0.4rem 0.75rem;
+            font-size: 0.8125rem;
+        }
+
+        .btn-edit:hover {
+            background: var(--accent-light);
+        }
+
+        /* Main Content */
+        .main {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .page-header h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        /* Summary Cards */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .summary-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1.25rem 1.5rem;
+            transition: all 0.25s ease;
+        }
+
+        .summary-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .summary-label {
+            font-size: 0.8125rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.375rem;
+        }
+
+        .summary-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .summary-card:nth-child(1) .summary-value { color: var(--accent); }
+        .summary-card:nth-child(2) .summary-value { color: var(--danger); }
+        .summary-card:nth-child(3) .summary-value { color: var(--warning); }
+        .summary-card:nth-child(4) .summary-value { color: var(--success); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.4);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--bg-card);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 540px;
+            box-shadow: var(--shadow-lg);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            padding: 1.5rem 1.75rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h2 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--border);
+            color: var(--text-primary);
+        }
+
+        .modal-body {
+            padding: 1.5rem 1.75rem 1.75rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.125rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 0.375rem;
+            color: var(--text-primary);
+        }
+
+        input, select {
+            width: 100%;
+            padding: 0.7rem 0.875rem;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            font-family: inherit;
+            background: var(--bg-primary);
+            transition: all 0.2s;
+            color: var(--text-primary);
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        select {
+            cursor: pointer;
+        }
+
+        .form-submit {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--accent);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            font-family: inherit;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.25);
+            margin-top: 0.5rem;
+        }
+
+        .form-submit:hover {
+            background: var(--accent-dark);
+            transform: translateY(-1px);
+        }
+
+        /* Loans Table */
+        .loans-section {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .loans-header {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .loans-header h2 {
+            font-size: 1.0625rem;
+            font-weight: 600;
+        }
+
+        .filter-group {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-btn {
+            padding: 0.375rem 0.875rem;
+            border-radius: 6px;
+            font-size: 0.8125rem;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid var(--border);
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+
+        .filter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+
+        .filter-btn:hover:not(.active) {
+            background: var(--bg-secondary);
+        }
+
+        /* Loan Cards (mobile-friendly) */
+        .loans-list {
+            padding: 0;
+        }
+
+        .loan-item {
+            padding: 1.25rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+            transition: background 0.15s;
+        }
+
+        .loan-item:last-child {
+            border-bottom: none;
+        }
+
+        .loan-item:hover {
+            background: var(--bg-secondary);
+        }
+
+        .loan-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 0.75rem;
+        }
+
+        .loan-lender {
+            font-size: 1rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+        }
+
+        .loan-type-badge {
+            padding: 0.25rem 0.625rem;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.03em;
+        }
+
+        .badge-emi {
+            background: var(--accent-light);
+            color: var(--accent);
+        }
+
+        .badge-bullet {
+            background: var(--purple-light);
+            color: var(--purple);
+        }
+
+        .loan-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .loan-detail {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .detail-value {
+            font-size: 0.9375rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .due-soon {
+            color: var(--warning);
+        }
+
+        .overdue {
+            color: var(--danger);
+        }
+
+        .due-ok {
+            color: var(--success);
+        }
+
+        .loan-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+        }
+
+        .empty-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.4;
+        }
+
+        .empty-state h3 {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+        }
+
+        .empty-state p {
+            color: var(--text-muted);
+            font-size: 0.9375rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        footer {
+            border-top: 1px solid var(--border);
+            padding: 2rem;
+            text-align: center;
+            margin-top: 3rem;
+        }
+
+        footer p {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+        }
+
+        @media (max-width: 768px) {
+            nav {
+                padding: 1rem 1.25rem;
+            }
+
+            .main {
+                padding: 1.25rem;
+            }
+
+            .page-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .page-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .summary-grid {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .loan-details {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .loans-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+
+            .filter-group {
+                flex-wrap: wrap;
+            }
+
+            .loan-top {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html" class="logo">Loan <span>Tracker</span></a>
+            <div class="nav-buttons">
+                <button class="btn btn-primary" onclick="openModal()">+ Add Loan</button>
+            </div>
+        </nav>
+    </header>
+
+    <div class="main">
+        <div class="page-header">
+            <h1>Your Loans</h1>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-grid">
+            <div class="summary-card">
+                <div class="summary-label">Total Loans</div>
+                <div class="summary-value" id="totalLoans">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Total Outstanding</div>
+                <div class="summary-value" id="totalOutstanding">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Due This Month</div>
+                <div class="summary-value" id="dueThisMonth">0</div>
+            </div>
+            <div class="summary-card">
+                <div class="summary-label">Avg Interest Rate</div>
+                <div class="summary-value" id="avgInterest">0%</div>
+            </div>
+        </div>
+
+        <!-- Loans List -->
+        <div class="loans-section">
+            <div class="loans-header">
+                <h2>All Loans</h2>
+                <div class="filter-group">
+                    <button class="filter-btn active" data-filter="all">All</button>
+                    <button class="filter-btn" data-filter="emi">EMI</button>
+                    <button class="filter-btn" data-filter="bullet">Bullet</button>
+                </div>
+            </div>
+            <div class="loans-list" id="loansList">
+                <div class="empty-state" id="emptyState">
+                    <div class="empty-icon">&#128203;</div>
+                    <h3>No loans added yet</h3>
+                    <p>Click "Add Loan" to start tracking your repayments</p>
+                    <button class="btn btn-primary" onclick="openModal()">+ Add Your First Loan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Loan Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Loan</h2>
+                <button class="modal-close" onclick="closeModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="loanForm" onsubmit="saveLoan(event)">
+                    <input type="hidden" id="editId" value="">
+
+                    <div class="form-group">
+                        <label for="lenderName">Bank / Lender Name</label>
+                        <input type="text" id="lenderName" placeholder="e.g. HDFC Bank, SBI, Bajaj Finance" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="loanAmount">Loan Amount (&#8377;)</label>
+                            <input type="number" id="loanAmount" placeholder="e.g. 500000" min="0" step="any" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="interestRate">Interest Rate (%)</label>
+                            <input type="number" id="interestRate" placeholder="e.g. 9.5" min="0" max="100" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="repaymentType">Repayment Type</label>
+                        <select id="repaymentType" required>
+                            <option value="">Select type</option>
+                            <option value="emi">EMI (Equated Monthly Installment)</option>
+                            <option value="bullet">Bullet (Lump Sum at Maturity)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="repaymentDueDate">Repayment Due Date</label>
+                            <input type="date" id="repaymentDueDate" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="interestDueDate">Interest Due Date</label>
+                            <input type="date" id="interestDueDate" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="emiAmount">EMI / Installment Amount (&#8377;)</label>
+                            <input type="number" id="emiAmount" placeholder="e.g. 15000" min="0" step="any">
+                        </div>
+                        <div class="form-group">
+                            <label for="interestAmount">Interest Amount (&#8377;)</label>
+                            <input type="number" id="interestAmount" placeholder="e.g. 3958" min="0" step="any">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Notes (optional)</label>
+                        <input type="text" id="notes" placeholder="e.g. Collateral: Property at MG Road">
+                    </div>
+
+                    <button type="submit" class="form-submit" id="formSubmitBtn">Add Loan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 Loan Tracker. All data stored locally in your browser.</p>
+    </footer>
+
+    <script>
+        const STORAGE_KEY = 'loanTrackerData';
+        let loans = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        let currentFilter = 'all';
+
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                currentFilter = this.dataset.filter;
+                renderLoans();
+            });
+        });
+
+        function openModal(editId) {
+            const overlay = document.getElementById('modalOverlay');
+            const form = document.getElementById('loanForm');
+            const title = document.getElementById('modalTitle');
+            const submitBtn = document.getElementById('formSubmitBtn');
+
+            form.reset();
+            document.getElementById('editId').value = '';
+
+            if (editId !== undefined) {
+                const loan = loans.find(l => l.id === editId);
+                if (loan) {
+                    title.textContent = 'Edit Loan';
+                    submitBtn.textContent = 'Update Loan';
+                    document.getElementById('editId').value = loan.id;
+                    document.getElementById('lenderName').value = loan.lenderName;
+                    document.getElementById('loanAmount').value = loan.loanAmount;
+                    document.getElementById('interestRate').value = loan.interestRate;
+                    document.getElementById('repaymentType').value = loan.repaymentType;
+                    document.getElementById('repaymentDueDate').value = loan.repaymentDueDate;
+                    document.getElementById('interestDueDate').value = loan.interestDueDate;
+                    document.getElementById('emiAmount').value = loan.emiAmount || '';
+                    document.getElementById('interestAmount').value = loan.interestAmount || '';
+                    document.getElementById('notes').value = loan.notes || '';
+                }
+            } else {
+                title.textContent = 'Add New Loan';
+                submitBtn.textContent = 'Add Loan';
+            }
+
+            overlay.classList.add('active');
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.remove('active');
+        }
+
+        // Close modal on overlay click
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeModal();
+        });
+
+        function saveLoan(e) {
+            e.preventDefault();
+
+            const editId = document.getElementById('editId').value;
+            const loanData = {
+                id: editId ? parseInt(editId) : Date.now(),
+                lenderName: document.getElementById('lenderName').value.trim(),
+                loanAmount: parseFloat(document.getElementById('loanAmount').value),
+                interestRate: parseFloat(document.getElementById('interestRate').value),
+                repaymentType: document.getElementById('repaymentType').value,
+                repaymentDueDate: document.getElementById('repaymentDueDate').value,
+                interestDueDate: document.getElementById('interestDueDate').value,
+                emiAmount: parseFloat(document.getElementById('emiAmount').value) || 0,
+                interestAmount: parseFloat(document.getElementById('interestAmount').value) || 0,
+                notes: document.getElementById('notes').value.trim(),
+            };
+
+            if (editId) {
+                const idx = loans.findIndex(l => l.id === parseInt(editId));
+                if (idx !== -1) loans[idx] = loanData;
+            } else {
+                loans.push(loanData);
+            }
+
+            saveAndRender();
+            closeModal();
+        }
+
+        function deleteLoan(id) {
+            if (confirm('Are you sure you want to delete this loan?')) {
+                loans = loans.filter(l => l.id !== id);
+                saveAndRender();
+            }
+        }
+
+        function saveAndRender() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(loans));
+            renderLoans();
+            renderSummary();
+        }
+
+        function formatCurrency(num) {
+            if (num >= 10000000) return (num / 10000000).toFixed(2) + ' Cr';
+            if (num >= 100000) return (num / 100000).toFixed(2) + ' L';
+            return num.toLocaleString('en-IN');
+        }
+
+        function getDueStatus(dateStr) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const due = new Date(dateStr);
+            const diff = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
+
+            if (diff < 0) return { class: 'overdue', label: Math.abs(diff) + 'd overdue' };
+            if (diff === 0) return { class: 'overdue', label: 'Due today' };
+            if (diff <= 7) return { class: 'due-soon', label: 'In ' + diff + 'd' };
+            if (diff <= 30) return { class: 'due-soon', label: 'In ' + diff + 'd' };
+            return { class: 'due-ok', label: 'In ' + diff + 'd' };
+        }
+
+        function formatDate(dateStr) {
+            const d = new Date(dateStr);
+            return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        function renderSummary() {
+            document.getElementById('totalLoans').textContent = loans.length;
+
+            const totalAmt = loans.reduce((sum, l) => sum + l.loanAmount, 0);
+            document.getElementById('totalOutstanding').textContent = totalAmt > 0 ? '₹' + formatCurrency(totalAmt) : '₹0';
+
+            const now = new Date();
+            const thisMonth = loans.filter(l => {
+                const d = new Date(l.repaymentDueDate);
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            }).length;
+            const thisMonthInt = loans.filter(l => {
+                const d = new Date(l.interestDueDate);
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            }).length;
+            document.getElementById('dueThisMonth').textContent = thisMonth + thisMonthInt;
+
+            if (loans.length > 0) {
+                const avg = loans.reduce((sum, l) => sum + l.interestRate, 0) / loans.length;
+                document.getElementById('avgInterest').textContent = avg.toFixed(1) + '%';
+            } else {
+                document.getElementById('avgInterest').textContent = '0%';
+            }
+        }
+
+        function renderLoans() {
+            const container = document.getElementById('loansList');
+            const filtered = currentFilter === 'all'
+                ? loans
+                : loans.filter(l => l.repaymentType === currentFilter);
+
+            if (filtered.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state" id="emptyState">
+                        <div class="empty-icon">&#128203;</div>
+                        <h3>${currentFilter !== 'all' ? 'No ' + currentFilter.toUpperCase() + ' loans' : 'No loans added yet'}</h3>
+                        <p>${currentFilter !== 'all' ? 'Try a different filter or add a new loan' : 'Click "Add Loan" to start tracking your repayments'}</p>
+                        <button class="btn btn-primary" onclick="openModal()">+ Add Loan</button>
+                    </div>`;
+                return;
+            }
+
+            // Sort by nearest repayment due date
+            const sorted = [...filtered].sort((a, b) => new Date(a.repaymentDueDate) - new Date(b.repaymentDueDate));
+
+            container.innerHTML = sorted.map(loan => {
+                const repStatus = getDueStatus(loan.repaymentDueDate);
+                const intStatus = getDueStatus(loan.interestDueDate);
+
+                return `
+                <div class="loan-item">
+                    <div class="loan-top">
+                        <div class="loan-lender">${escapeHtml(loan.lenderName)}</div>
+                        <span class="loan-type-badge ${loan.repaymentType === 'emi' ? 'badge-emi' : 'badge-bullet'}">
+                            ${loan.repaymentType.toUpperCase()}
+                        </span>
+                    </div>
+                    <div class="loan-details">
+                        <div class="loan-detail">
+                            <span class="detail-label">Loan Amount</span>
+                            <span class="detail-value">₹${formatCurrency(loan.loanAmount)}</span>
+                        </div>
+                        <div class="loan-detail">
+                            <span class="detail-label">Interest Rate</span>
+                            <span class="detail-value">${loan.interestRate}%</span>
+                        </div>
+                        <div class="loan-detail">
+                            <span class="detail-label">Repayment Due</span>
+                            <span class="detail-value ${repStatus.class}">${formatDate(loan.repaymentDueDate)} (${repStatus.label})</span>
+                        </div>
+                        <div class="loan-detail">
+                            <span class="detail-label">Interest Due</span>
+                            <span class="detail-value ${intStatus.class}">${formatDate(loan.interestDueDate)} (${intStatus.label})</span>
+                        </div>
+                        ${loan.emiAmount ? `
+                        <div class="loan-detail">
+                            <span class="detail-label">${loan.repaymentType === 'emi' ? 'EMI Amount' : 'Installment'}</span>
+                            <span class="detail-value">₹${formatCurrency(loan.emiAmount)}</span>
+                        </div>` : ''}
+                        ${loan.interestAmount ? `
+                        <div class="loan-detail">
+                            <span class="detail-label">Interest Amount</span>
+                            <span class="detail-value">₹${formatCurrency(loan.interestAmount)}</span>
+                        </div>` : ''}
+                    </div>
+                    ${loan.notes ? `<div style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem;">${escapeHtml(loan.notes)}</div>` : ''}
+                    <div class="loan-actions">
+                        <button class="btn btn-edit" onclick="openModal(${loan.id})">Edit</button>
+                        <button class="btn btn-danger" onclick="deleteLoan(${loan.id})">Delete</button>
+                    </div>
+                </div>`;
+            }).join('');
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+
+        // Initial render
+        renderLoans();
+        renderSummary();
+    </script>
+</body>
+</html>
