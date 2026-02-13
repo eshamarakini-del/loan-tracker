@@ -561,7 +561,9 @@
         <nav>
             <a href="index.html" class="logo">Loan <span>Tracker</span></a>
             <div class="nav-buttons">
+                <span id="userEmail" style="font-size:0.875rem;color:var(--text-muted);display:flex;align-items:center;"></span>
                 <button class="btn btn-primary" onclick="openModal()">+ Add Loan</button>
+                <button class="btn btn-secondary" onclick="logout()">Sign Out</button>
             </div>
         </nav>
     </header>
@@ -685,7 +687,28 @@
         <p>&copy; 2025 Loan Tracker. All data stored locally in your browser.</p>
     </footer>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
+        // Auth check
+        const SUPABASE_URL = 'https://qcyoukklhonwahklryyg.supabase.co';
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFjeW91a2tsaG9ud2Foa2xyeXlnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjA3Nzc3MjcsImV4cCI6MjA3NjM1MzcyN30.ra7TCZHZJgcfGcEaQxLRtod-szjfPsMsexXSv_DPZAM';
+        const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        (async function checkAuth() {
+            const { data: { user } } = await sb.auth.getUser();
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('userEmail').textContent = user.email;
+        })();
+
+        async function logout() {
+            await sb.auth.signOut();
+            localStorage.removeItem('loanTrackerUser');
+            window.location.href = 'login.html';
+        }
+
         const STORAGE_KEY = 'loanTrackerData';
         let loans = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
         let currentFilter = 'all';
