@@ -508,6 +508,26 @@
             font-size: 0.875rem;
         }
 
+        .message {
+            padding: 0.875rem 1rem;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .message.error {
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            color: var(--danger);
+        }
+
+        .message.success {
+            background: #ecfdf5;
+            border: 1px solid #a7f3d0;
+            color: var(--success);
+        }
+
         @media (max-width: 768px) {
             nav {
                 padding: 1rem 1.25rem;
@@ -563,6 +583,7 @@
             <div class="nav-buttons">
                 <span id="userEmail" style="font-size:0.875rem;color:var(--text-muted);display:flex;align-items:center;"></span>
                 <button class="btn btn-primary" onclick="openModal()">+ Add Loan</button>
+                <button class="btn btn-secondary" onclick="openPasswordModal()">Change Password</button>
                 <button class="btn btn-secondary" onclick="logout()">Sign Out</button>
             </div>
         </nav>
@@ -678,6 +699,30 @@
                     </div>
 
                     <button type="submit" class="form-submit" id="formSubmitBtn">Add Loan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="passwordModalOverlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2>Change Password</h2>
+                <button class="modal-close" onclick="closePasswordModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="message" id="pwMessage" style="display:none;"></div>
+                <form id="passwordForm" onsubmit="changePassword(event)">
+                    <div class="form-group">
+                        <label for="newPassword">New Password</label>
+                        <input type="password" id="newPassword" placeholder="Enter new password" minlength="6" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirmPassword">Confirm Password</label>
+                        <input type="password" id="confirmPassword" placeholder="Confirm new password" minlength="6" required>
+                    </div>
+                    <button type="submit" class="form-submit" id="pwSubmitBtn">Update Password</button>
                 </form>
             </div>
         </div>
@@ -933,6 +978,58 @@
             const div = document.createElement('div');
             div.textContent = str;
             return div.innerHTML;
+        }
+
+        // Change Password
+        function openPasswordModal() {
+            document.getElementById('passwordForm').reset();
+            const msg = document.getElementById('pwMessage');
+            msg.style.display = 'none';
+            msg.className = 'message';
+            document.getElementById('passwordModalOverlay').classList.add('active');
+        }
+
+        function closePasswordModal() {
+            document.getElementById('passwordModalOverlay').classList.remove('active');
+        }
+
+        document.getElementById('passwordModalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closePasswordModal();
+        });
+
+        async function changePassword(e) {
+            e.preventDefault();
+            const newPw = document.getElementById('newPassword').value;
+            const confirmPw = document.getElementById('confirmPassword').value;
+            const msg = document.getElementById('pwMessage');
+            const btn = document.getElementById('pwSubmitBtn');
+
+            if (newPw !== confirmPw) {
+                msg.textContent = 'Passwords do not match.';
+                msg.className = 'message show error';
+                msg.style.display = 'block';
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+
+            try {
+                const { error } = await sb.auth.updateUser({ password: newPw });
+                if (error) throw error;
+                msg.textContent = 'Password updated successfully!';
+                msg.className = 'message show success';
+                msg.style.display = 'block';
+                btn.textContent = 'Update Password';
+                btn.disabled = false;
+                setTimeout(() => closePasswordModal(), 1500);
+            } catch (error) {
+                msg.textContent = error.message;
+                msg.className = 'message show error';
+                msg.style.display = 'block';
+                btn.textContent = 'Update Password';
+                btn.disabled = false;
+            }
         }
 
         // Initial render
