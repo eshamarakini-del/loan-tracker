@@ -650,12 +650,23 @@
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="loanAmount">Loan Amount (&#8377;)</label>
+                            <label for="loanAmount">Total Loan Amount (&#8377;)</label>
                             <input type="number" id="loanAmount" placeholder="e.g. 500000" min="0" step="any" required>
                         </div>
                         <div class="form-group">
+                            <label for="currentOutstanding">Current Outstanding (&#8377;)</label>
+                            <input type="number" id="currentOutstanding" placeholder="e.g. 350000" min="0" step="any" required>
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
                             <label for="interestRate">Interest Rate (%)</label>
                             <input type="number" id="interestRate" placeholder="e.g. 9.5" min="0" max="100" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="interestResetDate">Interest Reset Date</label>
+                            <input type="date" id="interestResetDate">
                         </div>
                     </div>
 
@@ -674,18 +685,18 @@
                             <input type="date" id="repaymentDueDate" required>
                         </div>
                         <div class="form-group">
-                            <label for="interestDueDate">Interest Due Date</label>
+                            <label for="interestDueDate">Interest/EMI Due Date</label>
                             <input type="date" id="interestDueDate" required>
                         </div>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
-                            <label for="emiAmount">EMI / Installment Amount (&#8377;)</label>
+                            <label for="emiAmount">Monthly EMI (&#8377;)</label>
                             <input type="number" id="emiAmount" placeholder="e.g. 15000" min="0" step="any">
                         </div>
                         <div class="form-group">
-                            <label for="interestAmount">Interest Amount (&#8377;)</label>
+                            <label for="interestAmount">Monthly Interest (&#8377;)</label>
                             <input type="number" id="interestAmount" placeholder="e.g. 3958" min="0" step="any">
                         </div>
                     </div>
@@ -737,7 +748,9 @@
                     document.getElementById('editId').value = loan.id;
                     document.getElementById('lenderName').value = loan.lenderName;
                     document.getElementById('loanAmount').value = loan.loanAmount;
+                    document.getElementById('currentOutstanding').value = loan.currentOutstanding || '';
                     document.getElementById('interestRate').value = loan.interestRate;
+                    document.getElementById('interestResetDate').value = loan.interestResetDate || '';
                     document.getElementById('repaymentType').value = loan.repaymentType;
                     document.getElementById('repaymentDueDate').value = loan.repaymentDueDate;
                     document.getElementById('interestDueDate').value = loan.interestDueDate;
@@ -775,7 +788,9 @@
                 id: editId ? parseInt(editId) : Date.now(),
                 lenderName: document.getElementById('lenderName').value.trim(),
                 loanAmount: parseFloat(document.getElementById('loanAmount').value),
+                currentOutstanding: parseFloat(document.getElementById('currentOutstanding').value),
                 interestRate: parseFloat(document.getElementById('interestRate').value),
+                interestResetDate: document.getElementById('interestResetDate').value || '',
                 repaymentType: document.getElementById('repaymentType').value,
                 repaymentDueDate: document.getElementById('repaymentDueDate').value,
                 interestDueDate: document.getElementById('interestDueDate').value,
@@ -835,7 +850,7 @@
         function renderSummary() {
             document.getElementById('totalLoans').textContent = loans.length;
 
-            const totalAmt = loans.reduce((sum, l) => sum + l.loanAmount, 0);
+            const totalAmt = loans.reduce((sum, l) => sum + (l.currentOutstanding || l.loanAmount), 0);
             document.getElementById('totalOutstanding').textContent = totalAmt > 0 ? '₹' + formatCurrency(totalAmt) : '₹0';
 
             const now = new Date();
@@ -891,30 +906,39 @@
                     </div>
                     <div class="loan-details">
                         <div class="loan-detail">
-                            <span class="detail-label">Loan Amount</span>
+                            <span class="detail-label">Total Loan</span>
                             <span class="detail-value">₹${formatCurrency(loan.loanAmount)}</span>
+                        </div>
+                        <div class="loan-detail">
+                            <span class="detail-label">Outstanding</span>
+                            <span class="detail-value">₹${formatCurrency(loan.currentOutstanding || loan.loanAmount)}</span>
                         </div>
                         <div class="loan-detail">
                             <span class="detail-label">Interest Rate</span>
                             <span class="detail-value">${loan.interestRate}%</span>
                         </div>
-                        <div class="loan-detail">
-                            <span class="detail-label">Repayment Due</span>
-                            <span class="detail-value ${repStatus.class}">${formatDate(loan.repaymentDueDate)} (${repStatus.label})</span>
-                        </div>
-                        <div class="loan-detail">
-                            <span class="detail-label">Interest Due</span>
-                            <span class="detail-value ${intStatus.class}">${formatDate(loan.interestDueDate)} (${intStatus.label})</span>
-                        </div>
                         ${loan.emiAmount ? `
                         <div class="loan-detail">
-                            <span class="detail-label">${loan.repaymentType === 'emi' ? 'EMI Amount' : 'Installment'}</span>
+                            <span class="detail-label">Monthly EMI</span>
                             <span class="detail-value">₹${formatCurrency(loan.emiAmount)}</span>
                         </div>` : ''}
                         ${loan.interestAmount ? `
                         <div class="loan-detail">
-                            <span class="detail-label">Interest Amount</span>
+                            <span class="detail-label">Monthly Interest</span>
                             <span class="detail-value">₹${formatCurrency(loan.interestAmount)}</span>
+                        </div>` : ''}
+                        <div class="loan-detail">
+                            <span class="detail-label">EMI/Interest Due</span>
+                            <span class="detail-value ${intStatus.class}">${formatDate(loan.interestDueDate)} (${intStatus.label})</span>
+                        </div>
+                        <div class="loan-detail">
+                            <span class="detail-label">Repayment Due</span>
+                            <span class="detail-value ${repStatus.class}">${formatDate(loan.repaymentDueDate)} (${repStatus.label})</span>
+                        </div>
+                        ${loan.interestResetDate ? `
+                        <div class="loan-detail">
+                            <span class="detail-label">Interest Reset</span>
+                            <span class="detail-value">${formatDate(loan.interestResetDate)}</span>
                         </div>` : ''}
                     </div>
                     ${loan.notes ? `<div style="font-size: 0.8125rem; color: var(--text-muted); margin-bottom: 0.75rem;">${escapeHtml(loan.notes)}</div>` : ''}
